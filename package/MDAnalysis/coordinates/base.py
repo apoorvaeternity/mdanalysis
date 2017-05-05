@@ -158,10 +158,10 @@ class Timestep(object):
     .. versionchanged:: 0.11.0
        Added :meth:`from_timestep` and :meth:`from_coordinates` constructor
        methods.
-       :class:`Timestep` init now only accepts integer creation
-       :attr:`n_atoms` now a read only property
-       :attr:`frame` now 0-based instead of 1-based
-       Attributes status and step removed
+       :class:`Timestep` init now only accepts integer creation.
+       :attr:`n_atoms` now a read only property.
+       :attr:`frame` now 0-based instead of 1-based.
+       Attributes `status` and `step` removed.
     """
     order = 'F'
 
@@ -174,23 +174,24 @@ class Timestep(object):
           The total number of atoms this Timestep describes
         positions : bool, optional
           Whether this Timestep has position information [``True``]
-        velocities : bool, optional
+        velocities : bool (optional)
           Whether this Timestep has velocity information [``False``]
-        forces : bool, optional
+        forces : bool (optional)
           Whether this Timestep has force information [``False``]
-        reader : Reader, optional
+        reader : Reader (optional)
           A weak reference to the owning Reader.  Used for
           when attributes require trajectory manipulation (e.g. dt)
-        dt : float, optional
+        dt : float (optional)
           The time difference between frames (ps).  If :attr:`time`
           is set, then `dt` will be ignored.
-        time_offset : float, optional
-          The starting time from which to calculate time (ps)
+        time_offset : float (optional)
+          The starting time from which to calculate time (in ps)
 
-          .. versionchanged:: 0.11.0
-             Added keywords for `positions`, `velocities` and `forces`.
-             Can add and remove position/velocity/force information by using
-             the ``has_*`` attribute.
+
+        .. versionchanged:: 0.11.0
+           Added keywords for `positions`, `velocities` and `forces`.
+           Can add and remove position/velocity/force information by using
+           the ``has_*`` attribute.
         """
         # readers call Reader._read_next_timestep() on init, incrementing
         # self.frame to 0
@@ -399,25 +400,41 @@ class Timestep(object):
         return self.from_timestep(self)
 
     def copy_slice(self, sel):
-        """Make a new Timestep containing a subset of the original Timestep.
+        """Make a new `Timestep` containing a subset of the original `Timestep`.
 
-        ``ts.copy_slice(slice(start, stop, skip))``
-        ``ts.copy_slice([list of indices])``
+        Parameters
+        ----------
+        sel : array_like or slice
+            The underlying position, velocity, and force arrays are sliced
+            using a :class:`list`, :class:`slice`, or any array-like.
 
         Returns
         -------
-        A Timestep object of the same type containing all header
-        information and all atom information relevant to the selection.
+        :class:`Timestep`
+            A `Timestep` object of the same type containing all header
+            information and all atom information relevant to the selection.
 
         Note
         ----
-        The selection must be a 0 based slice or array of the atom indices
-        in this Timestep
+        The selection must be a 0 based :class:`slice` or array of the atom indices
+        in this :class:`Timestep`
+
+        Example
+        -------
+        Using a Python :class:`slice` object::
+
+           new_ts = ts.copy_slice(slice(start, stop, step))
+
+        Using a list of indices::
+
+           new_ts = ts.copy_slice([0, 2, 10, 20, 23])
+
 
         .. versionadded:: 0.8
         .. versionchanged:: 0.11.0
            Reworked to follow new Timestep API.  Now will strictly only
            copy official attributes of the Timestep.
+
         """
         # Detect the size of the Timestep by doing a dummy slice
         try:
@@ -511,16 +528,17 @@ class Timestep(object):
 
         Returns
         -------
-          A numpy.ndarray of shape (n_atoms, 3) of position data for each
-          atom
+        positions : numpy.ndarray with dtype numpy.float32
+               position data of shape ``(n_atoms, 3)`` for all atoms
 
         Raises
         ------
-          :class:`MDAnalysis.exceptions.NoDataError`
-          If the Timestep has no position data
+        :exc:`MDAnalysis.exceptions.NoDataError`
+               if the Timestep has no position data
+
 
         .. versionchanged:: 0.11.0
-           Now can raise NoDataError when no position data present
+           Now can raise :exc`NoDataError` when no position data present
         """
         if self.has_positions:
             return self._pos
@@ -588,13 +606,14 @@ class Timestep(object):
 
         Returns
         -------
-          A numpy.ndarray of shape (n_atoms, 3) of velocity data for each
-          atom
+        velocities : numpy.ndarray with dtype numpy.float32
+               velocity data of shape ``(n_atoms, 3)`` for all atoms
 
         Raises
         ------
-          :class:`MDAnalysis.exceptions.NoDataError`
-          When the Timestep does not contain velocity information
+        :exc:`MDAnalysis.exceptions.NoDataError`
+               if the Timestep has no velocity data
+
 
         .. versionadded:: 0.11.0
         """
@@ -637,13 +656,14 @@ class Timestep(object):
 
         Returns
         -------
-        A numpy.ndarray of shape (n_atoms, 3) of force data for each
-        atom
+        forces : numpy.ndarray with dtype numpy.float32
+               force data of shape ``(n_atoms, 3)`` for all atoms
 
         Raises
         ------
-        :class:`MDAnalysis.NoDataError`
-        When the Timestep does not contain force information
+        :exc:`MDAnalysis.exceptions.NoDataError`
+               if the Timestep has no force data
+
 
         .. versionadded:: 0.11.0
         """
@@ -688,7 +708,8 @@ class Timestep(object):
 
         Returns
         -------
-        A (3, 3) numpy.ndarray of unit cell vectors
+        numpy.ndarray
+             A (3, 3) numpy.ndarray of unit cell vectors
 
         Examples
         --------
@@ -734,6 +755,7 @@ class Timestep(object):
         Note
         ----
         This defaults to 1.0 ps in the absence of time data
+
 
         .. versionadded:: 0.11.0
         """
@@ -804,17 +826,20 @@ class IOBase(object):
         ----------
         x : array_like
           Positions to transform
-        inplace : bool, optional
+        inplace : bool (optional)
           Whether to modify the array inplace, overwriting previous data
 
         Note
         ----
-        By default, the input *x* is modified in place and also returned.
+        By default, the input `x` is modified in place and also returned.
+        In-place operations improve performance because allocating new arrays
+        is avoided.
+
 
         .. versionchanged:: 0.7.5
-           Keyword *inplace* can be set to ``False`` so that a
+           Keyword `inplace` can be set to ``False`` so that a
            modified copy is returned *unless* no conversion takes
-           place, in which case the reference to the unmodified *x* is
+           place, in which case the reference to the unmodified `x` is
            returned.
 
         """
@@ -834,12 +859,15 @@ class IOBase(object):
         ----------
         v : array_like
           Velocities to transform
-        inplace : bool, optional
+        inplace : bool (optional)
           Whether to modify the array inplace, overwriting previous data
 
         Note
         ----
         By default, the input *v* is modified in place and also returned.
+        In-place operations improve performance because allocating new arrays
+        is avoided.
+
 
         .. versionadded:: 0.7.5
         """
@@ -859,12 +887,14 @@ class IOBase(object):
         ----------
         force : array_like
           Forces to transform
-        inplace : bool, optional
+        inplace : bool (optional)
           Whether to modify the array inplace, overwriting previous data
 
         Note
         ----
         By default, the input *force* is modified in place and also returned.
+        In-place operations improve performance because allocating new arrays
+        is avoided.
 
         .. versionadded:: 0.7.7
         """
@@ -884,20 +914,22 @@ class IOBase(object):
         ----------
         t : array_like
           Time values to transform
-        inplace : bool, optional
+        inplace : bool (optional)
           Whether to modify the array inplace, overwriting previous data
 
         Note
         ----
-        By default, the input *t* is modified in place and also
-        returned (although note that scalar values *t* are passed by
-        value in Python and hence an in-place modification has no
-        effect on the caller.)
+        By default, the input `t` is modified in place and also returned
+        (although note that scalar values `t` are passed by value in Python and
+        hence an in-place modification has no effect on the caller.)  In-place
+        operations improve performance because allocating new arrays is
+        avoided.
+
 
         .. versionchanged:: 0.7.5
-           Keyword *inplace* can be set to ``False`` so that a
+           Keyword `inplace` can be set to ``False`` so that a
            modified copy is returned *unless* no conversion takes
-           place, in which case the reference to the unmodified *x* is
+           place, in which case the reference to the unmodified `x` is
            returned.
 
         """
@@ -911,23 +943,26 @@ class IOBase(object):
         return t
 
     def convert_pos_to_native(self, x, inplace=True):
-        """Conversion of coordinate array x from base units to native units.
+        """Conversion of coordinate array `x` from base units to native units.
 
         Parameters
         ----------
         x : array_like
           Positions to transform
-        inplace : bool, optional
+        inplace : bool (optional)
           Whether to modify the array inplace, overwriting previous data
 
         Note
         ----
-        By default, the input *x* is modified in place and also returned.
+        By default, the input `x` is modified in place and also returned.
+        In-place operations improve performance because allocating new arrays
+        is avoided.
+
 
         .. versionchanged:: 0.7.5
-           Keyword *inplace* can be set to ``False`` so that a
+           Keyword `inplace` can be set to ``False`` so that a
            modified copy is returned *unless* no conversion takes
-           place, in which case the reference to the unmodified *x* is
+           place, in which case the reference to the unmodified `x` is
            returned.
 
         """
@@ -941,18 +976,21 @@ class IOBase(object):
         return x
 
     def convert_velocities_to_native(self, v, inplace=True):
-        """Conversion of coordinate array *v* from base to native units
+        """Conversion of coordinate array `v` from base to native units
 
         Parameters
         ----------
         v : array_like
           Velocities to transform
-        inplace : bool, optional
+        inplace : bool (optional)
           Whether to modify the array inplace, overwriting previous data
 
         Note
         ----
-        By default, the input *v* is modified in place and also returned.
+        By default, the input `v` is modified in place and also returned.
+        In-place operations improve performance because allocating new arrays
+        is avoided.
+
 
         .. versionadded:: 0.7.5
         """
@@ -972,12 +1010,15 @@ class IOBase(object):
         ----------
         force : array_like
           Forces to transform
-        inplace : bool, optional
+        inplace : bool (optional)
           Whether to modify the array inplace, overwriting previous data
 
         Note
         ----
-        By default, the input *force* is modified in place and also returned.
+        By default, the input `force` is modified in place and also returned.
+        In-place operations improve performance because allocating new arrays
+        is avoided.
+
 
         .. versionadded:: 0.7.7
         """
@@ -1065,6 +1106,7 @@ class ProtoReader(six.with_metaclass(_Readermeta, IOBase)):
     See Also
     --------
     :class:`ReaderBase`
+
 
     .. versionchanged:: 0.11.0
        Frames now 0-based instead of 1-based
@@ -1188,7 +1230,7 @@ class ProtoReader(six.with_metaclass(_Readermeta, IOBase)):
     def __getitem__(self, frame):
         """Return the Timestep corresponding to *frame*.
 
-        If *frame* is a integer then the corresponding frame is
+        If `frame` is a integer then the corresponding frame is
         returned. Negative numbers are counted from the end.
 
         If frame is a :class:`slice` then an iterator is returned that
@@ -1273,33 +1315,51 @@ class ProtoReader(six.with_metaclass(_Readermeta, IOBase)):
                             "".format(self.__class__.__name__))
 
     def check_slice_indices(self, start, stop, step):
-        """Check frame indices are valid and clip to fit trajectory
+        """Check frame indices are valid and clip to fit trajectory.
+
+        The usage follows standard Python conventions for :func:`range` but see
+        the warning below.
 
         Parameters
         ----------
-        start, stop, step : int or None
-          Values representing the slice indices.
-          Can use `None` to use defaults of (0, n_frames, and 1)
-          respectively.
+        start : int or None
+          Starting frame index (inclusive). ``None`` corresponds to the default
+          of 0, i.e., the initial frame.
+        stop : int or None
+          Last frame index (exclusive). ``None`` corresponds to the default
+          of n_frames, i.e., it includes the last frame of the trajectory.
+        step : int or None
+          step size of the slice, ``None`` corresponds to the default of 1, i.e,
+          include every frame in the range `start`, `stop`.
 
         Returns
         -------
-        start, stop, step : int
+        start, stop, step : tuple (int, int, int)
           Integers representing the slice
 
         Warning
         -------
-        The returned values start, stop and step give the expected result when passed
-        in range() but gives unexpected behaviour when passed in a slice when stop=None
-        and step=-1
+        The returned values `start`, `stop` and `step` give the expected result
+        when passed in :func:`range` but gives unexpected behavior when passed
+        in a :class:`slice` when ``stop=None`` and ``step=-1``
 
-        This is because when we slice the trajectory (u.trajectory[::-1]), the values
-        returned by check_slice_indices are passed to range. Instead, in AnalysisBase
-        the values returned by check_slice_indices are used to splice the trajectory.
-        This creates a discrepancy because these two lines are not equivalent:
+        This can be a problem for downstream processing of the output from this
+        method. For example, slicing of trajectories is implemented by passing
+        the values returned by :meth:`check_slice_indices` to :func:`range` ::
 
-            range(10, -1, -1)  # [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-            range(10)[10:-1:-1]  # []
+          range(start, stop, step)
+
+        and using them as the indices to randomly seek to. On the other hand,
+        in :class:`MDAnalysis.analysis.base.AnalysisBase` the values returned
+        by :meth:`check_slice_indices` are used to splice the trajectory by
+        creating a :class:`slice` instance ::
+
+          slice(start, stop, step)
+
+        This creates a discrepancy because these two lines are not equivalent::
+
+            range(10, -1, -1)             # [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+            range(10)[slice(10, -1, -1)]  # []
 
         """
 
@@ -1359,7 +1419,7 @@ class ProtoReader(six.with_metaclass(_Readermeta, IOBase)):
         :class:`~MDAnalysis.auxiliary.base.AuxReader` instance, or the data
         itself as e.g. a filename; in the latter case an appropriate
         :class:`~MDAnalysis.auxiliary.base.AuxReader` is guessed from the
-        data/file format. An appropriate *format* may also be directly provided
+        data/file format. An appropriate `format` may also be directly provided
         as a key word argument.
 
         On adding, the AuxReader is initially matched to the current timestep
@@ -1630,6 +1690,7 @@ class ReaderBase(ProtoReader):
     --------
     :class:`ProtoReader`
 
+
     .. versionchanged:: 0.11.0
        Most of the base Reader class definitions were offloaded to
        :class:`ProtoReader` so as to allow the subclassing of ReaderBases without a
@@ -1714,15 +1775,17 @@ class WriterBase(six.with_metaclass(_Writermeta, IOBase)):
         return np.concatenate([lengths, angles])
 
     def write(self, obj):
-        """Write current timestep, using the supplied *obj*.
+        """Write current timestep, using the supplied `obj`.
 
-        The argument should be a :class:`~MDAnalysis.core.groups.AtomGroup` or
-        a :class:`~MDAnalysis.core.universe.Universe` or a :class:`Timestep` instance.
+        Parameters
+        ----------
+        obj : :class:`~MDAnalysis.core.groups.AtomGroup` or :class:`~MDAnalysis.core.universe.Universe` or a :class:`Timestep`
+            write coordinate information associate with `obj`
 
-        .. Note::
-
-           The size of the *obj* must be the same as the number of atom
-           provided when setting up the trajectory.
+        Note
+        ----
+        The size of the `obj` must be the same as the number of atoms provided
+        when setting up the trajectory.
         """
         if isinstance(obj, Timestep):
             ts = obj
@@ -1757,10 +1820,10 @@ class WriterBase(six.with_metaclass(_Writermeta, IOBase)):
 
         Parameters
         ----------
-        criteria: dict
+        criteria : dict
             dictionary containing the *max* and *min* values in native units
-            *x* :class:`np.ndarray` of ``(x, y, z)`` coordinates of atoms
-            selected to be written out.
+        x : numpy.ndarray
+            ``(x, y, z)`` coordinates of atoms selected to be written out
 
         Returns
         -------
